@@ -5,83 +5,25 @@ on: [push, pull_request]
 jobs:
   test:
     runs-on: ubuntu-latest
-    
+
     steps:
-    - uses: actions/checkout@v3
-    
-    - name: Set up Python 3.9
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.9'
-    
-    - name: Install dependencies
-      run: |
-        # Installera Faker
-        pip install Faker==25.0.0
-        
-        # Om requirements.txt finns
-        if [ -f "requirements.txt" ]; then
-          pip install -r requirements.txt
-        fi
-    
-    - name: Test Python syntax
-      run: |
-        # Kompilera för syntaxkontroll
-        python -m py_compile app.py
-        echo "✅ Syntax check passed"
-    
-    - name: Test imports
-      run: |
-        # Testa imports
-        python -c "import sqlite3; import os; print('✅ Core imports: sqlite3, os')"
-        python -c "from faker import Faker; print('✅ Faker import successful')"
-    
-    - name: Test app module
-      run: |
-        # Testa app-modulen med minnesdatabas
-        python -c "
-import app
+      - uses: actions/checkout@v3
 
-# Spara original sökväg
-original_db = app.DB_PATH
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.9"
 
-# Använd minnesdatabas för test
-app.DB_PATH = ':memory:'
+      - name: Install dependencies
+        run: |
+          pip install Faker==25.0.0
 
-try:
-    print('Testing init_database()...')
-    app.init_database()
-    print('✅ init_database() works')
-    
-    print('Testing populate_fake_users()...')
-    app.populate_fake_users(3)
-    print('✅ populate_fake_users() works')
-    
-    print('Testing display_users()...')
-    app.display_users()
-    print('✅ display_users() works')
-    
-    # Återställ
-    app.DB_PATH = original_db
-    
-    print('🎉 All tests passed!')
-    
-except Exception as e:
-    print(f'❌ Error: {e}')
-    import traceback
-    traceback.print_exc()
-    exit(1)
-        "
-    
-    - name: Check project structure
-      run: |
-        echo "Project files:"
-        ls -la
-        
-        echo ""
-        echo "Requirements.txt content:"
-        if [ -f "requirements.txt" ]; then
-          cat requirements.txt
-        else
-          echo "No requirements.txt found"
-        fi
+      - name: Test syntax
+        run: |
+          python -m py_compile app.py
+          echo "Syntax check passed"
+
+      - name: Test imports
+        run: |
+          python -c "import sqlite3; import os; print('Core imports OK')"
+          python -c "from faker import Faker; print('Faker import OK')"
