@@ -77,4 +77,3 @@ print('✅ Database initialization works')
         else
           echo "⚠️  docker-compose.yml missing (optional)"
         fi
-        
