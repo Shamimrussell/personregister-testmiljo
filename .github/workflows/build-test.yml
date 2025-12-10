@@ -3,7 +3,7 @@ name: Build and Test
 on: [push, pull_request]
 
 jobs:
-  test:
+  python-test:
     runs-on: ubuntu-latest
     
     steps:
@@ -14,34 +14,67 @@ jobs:
       with:
         python-version: '3.9'
     
-    - name: Check and create requirements.txt
+    - name: Check dependencies
       run: |
+        # Check if requirements.txt exists
         if [ ! -f "requirements.txt" ]; then
+          echo "requirements.txt not found, creating one..."
           echo "Faker==25.0.0" > requirements.txt
-          echo "Created requirements.txt"
         fi
-        cat requirements.txt
     
     - name: Install dependencies
       run: |
         pip install -r requirements.txt
     
-    - name: Test imports and syntax
+    - name: Syntax and import test
       run: |
-        python -c "import sqlite3, os; print('Core imports: ✅')"
-        python -c "from faker import Faker; print('Faker import: ✅')"
-        python -m py_compile app.py
-        echo "✅ Code compilation successful"
+        python -m py_compile app.py show_users.py
+        echo "✅ Syntax check passed"
+        
+        python -c "
+import sqlite3
+import os
+from faker import Faker
+print('✅ All imports successful')
+        "
     
-    - name: Test basic functionality
+    - name: Functional test
       run: |
         python -c "
 import app
-try:
-    app.init_database()
-    print('✅ Database init works')
-    print('✅ All tests passed!')
-except Exception as e:
-    print(f'❌ Error: {e}')
-    exit(1)
+# Test database functions without side effects
+print('Testing module import...')
+app.init_database()
+print('✅ Database initialization works')
         "
+  
+  docker-test:
+    runs-on: ubuntu-latest
+    needs: python-test  # Kör först efter python-test
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
+    
+    - name: Build Docker image
+      run: |
+        docker build -t personregister-test .
+        echo "✅ Docker build successful"
+    
+    - name: Check Dockerfile and docker-compose
+      run: |
+        if [ -f "Dockerfile" ]; then
+          echo "✅ Dockerfile exists"
+        else
+          echo "❌ Dockerfile missing"
+          exit 1
+        fi
+        
+        if [ -f "docker-compose.yml" ]; then
+          echo "✅ docker-compose.yml exists"
+        else
+          echo "⚠️  docker-compose.yml missing (optional)"
+        fi
+        
