@@ -5,9 +5,9 @@ services:
     build: .
     container_name: gdpr-user-registry
     volumes:
-      - database_data:/data
+      - database_data:data
     environment:
-      - DATABASE_PATH=/data/test_users.db
+      - DATABASE_PATH=data/test_users.db
 
 volumes:
   database_data:
