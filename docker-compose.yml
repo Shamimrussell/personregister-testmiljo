@@ -1,13 +1,12 @@
-version: '3.8'
-
+# docker-compose.yml
 services:
   app:
     build: .
     container_name: gdpr-user-registry
     volumes:
-      - database_data:data
+      - ./data:/app/data  # Bind mount lokal mapp till container
     environment:
-      - DATABASE_PATH=data/test_users.db
+      - DATABASE_PATH=/app/data/test_users.db
+    restart: unless-stopped
 
-volumes:
-  database_data:
+# Ta bort 'version:' och 'volumes:' raderna helt
