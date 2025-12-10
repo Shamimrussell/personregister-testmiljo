@@ -4,9 +4,10 @@ services:
     build: .
     container_name: gdpr-user-registry
     volumes:
-      - ./data:/app/data  # Bind mount lokal mapp till container
+      - database_data:/app/data  # Named volume till /app/data
     environment:
       - DATABASE_PATH=/app/data/test_users.db
     restart: unless-stopped
 
-# Ta bort 'version:' och 'volumes:' raderna helt
+volumes:
+  database_data:  # Definierar volymen
