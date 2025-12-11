@@ -5,19 +5,18 @@ from faker import Faker
 #Skapar en instans av Faker för att generera testdata
 fake = Faker('sv_SE')
 
-DB_PATH = os.getenv("DATABASE_PATH", "data/test_users.db")
+DB_PATH = os.getenv("DATABASE_PATH", "data/test_users.db") #Databasens sökväg från miljövariabel eller standardvärde
 
-def get_connection():
+def get_connection():                                       #
     os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
     return sqlite3.connect(DB_PATH)
 
-def init_database():
-    """Initialize the database and create users table"""
+def init_database(): #initierar databasen och skapar tabellen om den inte finns
 
     conn = get_connection()
     cursor = conn.cursor()
     
-    # Ta bort tabellen om den finns 
+    # Tar bort tabellen om den finns 
     cursor.execute("DROP TABLE IF EXISTS users")
     
     # Skapa tabellen om den inte finns med alla kolumner
@@ -31,8 +30,7 @@ def init_database():
         )
     """)
     
-     #Ingen DELETE behövs eftersom tabellen droppades
-    #Men vi återställer sekvensen för säkerhets skull
+     #Ingen DELETE behövs eftersom tabellen droppades Men vi återställer sekvensen för säkerhets skull
     cursor.execute("DELETE FROM sqlite_sequence WHERE name='users'")
 
     conn.commit()
@@ -41,15 +39,14 @@ def init_database():
     print("Databas initierad och tabellen skapad.")
 
 def populate_fake_users(amount=100):
-    """
-    Skapar 'amount' antal faker-användare och lägger in dem i den redan nollställda tabellen.
-    Alla körningar börjar om från en tom tabell (DEL 1 sköter nollställningen).
-    """
+    
+    # Skapar 'amount' antal faker-användare och lägger in dem i den redan nollställda tabellen.
+    # Alla körningar börjar om från en tom tabell (DEL 1 sköter nollställningen).
 
     conn = get_connection()
     cursor = conn.cursor()
 
-# Generera och infoga fake-användare
+# Genererar och infogar fake-användare
     users = []
     for _ in range(amount):
         users.append((
@@ -70,25 +67,22 @@ def populate_fake_users(amount=100):
 
     print(f"{amount} faker-användare har lagts in i databasen.")
 
-def display_users():
-
-#"""Display all users in the database"""
-    print("DEBUG: display_users() körs")
-    db_path = os.getenv('DATABASE_PATH', 'data/test_users.db')
+def display_users(): # Visar alla användare i databasen
+    print("DEBUG: display_users() körs") 
+    db_path = os.getenv('DATABASE_PATH', 'data/test_users.db') 
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
     cursor.execute('SELECT * FROM users')
     users = cursor.fetchall()
     print("\nCurrent users in database:")
 
-    for u in users:
+    for u in users: #Skriver ut varje användare
         print(f"ID: {u[0]} | Name: {u[1]} | Email: {u[2]} | Address: {u[3]} | Personnummer: {u[4]}")
 
     conn.close()
 
-def clear_test_data():
-
 #GDPR Action 1: Clear all test data
+def clear_test_data(): 
     db_path = os.getenv('DATABASE_PATH', 'data/test_users.db')
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
@@ -97,12 +91,11 @@ def clear_test_data():
     conn.close()
     print("All test data has been cleared (GDPR compliant)")
 
-
-def anonymize_data():
 #GDPR Action 2: Anonymize user data
-    print("DEBUG: anonymize_data() körs")  # Lägg till denna rad
+def anonymize_data():
+    print("DEBUG: anonymize_data() körs") #Bekräftar att funktionen har startat (Bra för att verifiera att funktionen faktiskt anropas)
     db_path = os.getenv('DATABASE_PATH', 'data/test_users.db')
-    print(f"DEBUG: Databassökväg: {db_path}")  # Lägg till denna rad
+    print(f"DEBUG: Databassökväg: {db_path}")  
     db_path = os.getenv('DATABASE_PATH', 'data/test_users.db')
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
@@ -111,14 +104,9 @@ def anonymize_data():
     conn.close()
     print("All user names have been anonymized (GDPR compliant)")
 
-
+# Huvudprogrammet för att initiera databasen och köra en enkel loop
 if __name__ == "__main__":
     init_database()
-    populate_fake_users()
-
-
-    # Keep the container running for testing
-    print("\nContainer is running. Press Ctrl+C to exit.")
     try:
         while True:
             pass
