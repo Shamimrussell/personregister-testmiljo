@@ -5,13 +5,14 @@ import tempfile
 from unittest.mock import patch
 import sys
 
-# Mocka DATABASE_PATH innan vi importerar app.py
+# Mockar DATABASE_PATH innan vi importerar app.py
 os.environ['DATABASE_PATH'] = 'data/test_users_test.db'
 
-# Importera funktionerna från app.py
+# Importerar funktionerna från app.py
 sys.path.append('.')
 from app import init_database, populate_fake_users, anonymize_data as original_anonymize_data, get_connection, clear_test_data
 
+# Fix för anonymize_data för att använda get_connection()
 def anonymize_data_fixed():
     """En fixad version av anonymize_data som använder get_connection()"""
     print("DEBUG: anonymize_data_fixed() körs")
@@ -31,7 +32,7 @@ def test_anonymize_data():
     temp_db.close()
     
     try:
-        # Sätt miljövariabeln till testdatabasen
+        # Sätter miljövariabeln till testdatabasen
         with patch.dict(os.environ, {'DATABASE_PATH': temp_db_path}, clear=True):
             
             # 1. Initiera databasen
@@ -56,10 +57,10 @@ def test_anonymize_data():
             conn.commit()
             conn.close()
             
-            # 3. Kör den fixade anonymiseringsfunktionen
+            # Kör den fixade anonymiseringsfunktionen
             anonymize_data_fixed()
             
-            # 4. Verifiera att datan är anonymiserad
+            # Verifierar att datan är anonymiserad
             conn = get_connection()
             cursor = conn.cursor()
             
@@ -70,7 +71,8 @@ def test_anonymize_data():
             for user in users:
                 assert user[0] == "Anonym Användare"
             
-            # Kontrollera att vi fortfarande har 2 användare
+
+            # Kontrollerar att antalet användare är oförändrat
             cursor.execute("SELECT COUNT(*) FROM users")
             count = cursor.fetchone()[0]
             assert count == 2
