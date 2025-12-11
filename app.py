@@ -103,7 +103,7 @@ def anonymize_data():
     conn.commit()
     conn.close()
     print("All user names have been anonymized (GDPR compliant)")
-
+#skapat nytt
 # Huvudprogrammet för att initiera databasen och köra en enkel loop
 if __name__ == "__main__":
     init_database()
